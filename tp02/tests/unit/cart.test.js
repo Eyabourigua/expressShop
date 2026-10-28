@@ -1,52 +1,136 @@
+
 const { Cart } = require('../../src/cart/Cart');
 
-const cart = new Cart();
+describe('Cart', () => {
+  let cart;
 
-// T1
-test('ajout', () => {
-  cart.addItem({ id: 1, name: 'Souris sans fil', price: 24.9, quantity: 1 });
-  expect(cart.getItems().length).toBe(1);
-});
+  beforeEach(() => {
+    cart = new Cart();
+  });
 
-// T2
-test('total', () => {
-  expect(cart.getTotal()).toBe(24.9);
-});
+  // T1
+  test('adds an item to an empty cart', () => {
+    cart.addItem({
+      id: 1,
+      name: 'Souris sans fil',
+      price: 24.9,
+      quantity: 1,
+    });
 
-// T3
-test('doublon', () => {
-  const c = new Cart();
-  c.addItem({ id: 2, name: 'Câble USB', price: 19.99, quantity: 2 });
-  c.addItem({ id: 2, name: 'Câble USB', price: 19.99, quantity: 3 });
-  c.getTotalQuantity();
-});
+    expect(cart.getItems()).toEqual([
+      {
+        id: 1,
+        name: 'Souris sans fil',
+        price: 24.9,
+        quantity: 1,
+      },
+    ]);
+  });
 
-// T4
-test('test 4', () => {
-  const c = new Cart();
-  c.addItem({ id: 1, name: 'Souris sans fil', price: 24.9, quantity: 1 });
-  c.addItem({ id: 2, name: 'Clavier mécanique', price: 119, quantity: 1 });
-  expect(c.getItems().length).toBe(2);
-  c.removeItem(99);
-  expect(c.getItems().length).toBe(2);
-  c.removeItem(1);
-  expect(c.getItems().length).toBe(1);
-  expect(c.getTotal()).toBe(119);
-  c.clear();
-  expect(c.getItems().length).toBe(0);
-});
+  // T2
+  test('calculates the total price of the cart', () => {
+    cart.addItem({
+      id: 1,
+      name: 'Souris sans fil',
+      price: 24.9,
+      quantity: 1,
+    });
 
-// T5
-test('quantité aléatoire', () => {
-  const quantity = Math.floor(Math.random() * 2);
-  const c = new Cart();
-  c.addItem({ id: 3, name: 'Câble HDMI', price: 10, quantity });
-  expect(c.getTotal()).toBe(10 * quantity);
-});
+    expect(cart.getTotal()).toBe(24.9);
+  });
 
-// T6
-test('affichage', () => {
-  const c = new Cart();
-  c.addItem({ id: 4, name: 'Clavier mécanique', price: 119, quantity: 1 });
-  console.log('Total du panier :', c.getTotal());
+  // T3
+  test('adds quantities when the same item is added twice', () => {
+    cart.addItem({
+      id: 2,
+      name: 'Câble USB',
+      price: 19.99,
+      quantity: 2,
+    });
+
+    cart.addItem({
+      id: 2,
+      name: 'Câble USB',
+      price: 19.99,
+      quantity: 3,
+    });
+
+    expect(cart.getItems()).toHaveLength(1);
+    expect(cart.getTotalQuantity()).toBe(5);
+    expect(cart.getTotal()).toBe(99.95);
+  });
+
+  // T4
+  test('removes only the requested item and clears the cart', () => {
+    cart.addItem({
+      id: 1,
+      name: 'Souris sans fil',
+      price: 24.9,
+      quantity: 1,
+    });
+
+    cart.addItem({
+      id: 2,
+      name: 'Clavier mécanique',
+      price: 119,
+      quantity: 1,
+    });
+
+    cart.removeItem(99);
+    expect(cart.getItems()).toHaveLength(2);
+
+    cart.removeItem(1);
+    expect(cart.getItems()).toEqual([
+      {
+        id: 2,
+        name: 'Clavier mécanique',
+        price: 119,
+        quantity: 1,
+      },
+    ]);
+
+    cart.clear();
+    expect(cart.getItems()).toEqual([]);
+    expect(cart.getTotal()).toBe(0);
+  });
+
+  // T5
+  test('rejects a quantity of zero', () => {
+    expect(() => {
+      cart.addItem({
+        id: 3,
+        name: 'Câble HDMI',
+        price: 10,
+        quantity: 0,
+      });
+    }).toThrow(RangeError);
+  });
+
+  // T6
+  test('returns a copy without exposing the internal cart items', () => {
+    cart.addItem({
+      id: 4,
+      name: 'Clavier mécanique',
+      price: 119,
+      quantity: 1,
+    });
+
+    const items = cart.getItems();
+    items[0].quantity = 99;
+    items.push({
+      id: 5,
+      name: 'Autre article',
+      price: 10,
+      quantity: 1,
+    });
+
+    expect(cart.getItems()).toEqual([
+      {
+        id: 4,
+        name: 'Clavier mécanique',
+        price: 119,
+        quantity: 1,
+      },
+    ]);
+  });
 });

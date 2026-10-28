@@ -1,5 +1,68 @@
 /**
  * Cart.js : panier de la boutique en ligne ExpressShop.
+ */
+
+function round2(value) {
+  return Math.round(value * 100) / 100;
+}
+
+class Cart {
+  constructor() {
+    this.items = [];
+  }
+
+  addItem({ id, name, price, quantity }) {
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      throw new RangeError(`Quantité invalide : ${quantity}`);
+    }
+
+    if (typeof price !== "number" || !Number.isFinite(price) || price < 0) {
+      throw new RangeError(`Prix invalide : ${price}`);
+    }
+
+    const existing = this.items.find((item) => item.id === id);
+
+    if (existing) {
+      existing.quantity += quantity;
+    } else {
+      this.items.push({ id, name, price, quantity });
+    }
+  }
+
+  removeItem(id) {
+    const index = this.items.findIndex((item) => item.id === id);
+
+    if (index !== -1) {
+      this.items.splice(index, 1);
+    }
+  }
+
+  getItems() {
+    return this.items.map((item) => ({ ...item }));
+  }
+
+  getTotalQuantity() {
+    return this.items.reduce((sum, item) => sum + item.quantity, 0);
+  }
+
+  getTotal() {
+    const total = this.items.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+
+    return round2(total);
+  }
+
+  clear() {
+    this.items = [];
+  }
+}
+
+module.exports = { Cart };
+
+/**
+ * Cart.js : panier de la boutique en ligne ExpressShop.
  *
  * SPÉCIFICATION
  *
@@ -33,52 +96,3 @@
  * clear()
  *   Vide le panier.
  */
-
-function round2(value) {
-  return Math.round(value * 100) / 100;
-}
-
-class Cart {
-  constructor() {
-    this.items = [];
-  }
-
-  addItem({ id, name, price, quantity }) {
-    if (!Number.isInteger(quantity) || quantity < 1) {
-      throw new RangeError(`Quantité invalide : ${quantity}`);
-    }
-    if (typeof price !== 'number' || !Number.isFinite(price) || price < 0) {
-      throw new RangeError(`Prix invalide : ${price}`);
-    }
-    const existing = this.items.find((item) => item.id === id);
-    if (existing) {
-      existing.quantity = quantity;
-    } else {
-      this.items.push({ id, name, price, quantity });
-    }
-  }
-
-  removeItem(id) {
-    const index = this.items.findIndex((item) => item.id === id);
-    this.items.splice(index, 1);
-  }
-
-  getItems() {
-    return this.items;
-  }
-
-  getTotalQuantity() {
-    return this.items.reduce((sum, item) => sum + item.quantity, 0);
-  }
-
-  getTotal() {
-    const total = this.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    return round2(total);
-  }
-
-  clear() {
-    this.items = [];
-  }
-}
-
-module.exports = { Cart };
