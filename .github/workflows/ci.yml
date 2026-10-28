@@ -1,14 +1,11 @@
 
 name: ExpressShop CI
-
-on:
-  push:
+on: push
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
-        run: echo "Running tests for ExpressShop"
+        - run: echo "Running tests for ExpressShop"
 
       
